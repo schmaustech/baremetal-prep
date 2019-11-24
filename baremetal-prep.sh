@@ -8,29 +8,25 @@ howto(){
   echo "Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g"
 }
 
+ENABLEDISCONNECT=0
+GENERATEINSTALLCONF=0
+while getopts p:b:dgh option
+do
+case "${option}"
+in
+p) PROV_CONN=${OPTARG};;
+b) MAIN_CONN=${OPTARG};;
+d) ENABLEDISCONNECT=1;;
+g) GENERATEINSTALLCONF=1;;
+h) howto; exit 0;;
+\?) howto; exit 1;;
+esac
+done
 
-set_opts(){
-  ENABLEDISCONNECT=0
-  GENERATEINSTALLCONF=0
-  while getopts p:b:dgh option
-  do
-  case "${option}"
-  in
-  p) PROV_CONN=${OPTARG};;
-  b) MAIN_CONN=${OPTARG};;
-  d) ENABLEDISCONNECT=1;;
-  g) GENERATEINSTALLCONF=1;;
-  h) howto; exit 0;;
-  \?) howto; exit 1;;
-  esac
-  done
-
-  if ([ -z "$PROV_CONN" ] || [ -z "$MAIN_CONN" ]) then
-   howto
-   exit 1
-  fi
-}
-
+if ([ -z "$PROV_CONN" ] || [ -z "$MAIN_CONN" ]) then
+ howto
+ exit 1
+fi
 
 disable_selinux(){
   echo -n "Disabling selinux..."
@@ -112,7 +108,7 @@ setup_env(){
 }
 
 setup_bridges(){
-  if `ip a|egrep "baremetal|provisioning"`; then
+  if `ip a|egrep "baremetal|provisioning" >/dev/null 2>&1`; then
     echo "A baremetal or provisioning interface already exists...Skipping!"
   else
     echo "Setting up baremetal and provisioning bridges..."
@@ -137,12 +133,15 @@ setup_installconfig(){
   /usr/bin/ansible-playbook -i hosts make-install-config.yml
 }
 
-set_opts
 setup_env
 install_depends
 disable_selinux
 setup_default_pool
 setup_bridges
-setup_installconfig
-setup_repository
+if ([ "$GENERATEINSTALLCONF" -eq "1" ]) then
+  setup_installconfig
+fi
+if ([ "$ENABLEDISCONNECT" -eq "1" ]) then
+  setup_repository
+fi
 exit
