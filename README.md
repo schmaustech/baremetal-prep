@@ -2,7 +2,7 @@
 
 **Purpose:**
 
-Baremetal-deploy.sh is a script designed to prepare a RHEL8 host for use as a bootstrap/provisioning node to deploy a baremetal OpenShift install.
+Baremetal-deploy.sh is a script designed to prepare a RHEL8 host for use as a bootstrap/provisioning node to deploy a IPI OpenShift cluster.
 
 **What it does:**
 
