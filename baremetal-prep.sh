@@ -8,26 +8,6 @@ howto(){
   echo "Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g"
 }
 
-ENABLEDISCONNECT=0
-GENERATEINSTALLCONF=0
-while getopts p:b:dgh option
-do
-case "${option}"
-in
-p) PROV_CONN=${OPTARG};;
-b) MAIN_CONN=${OPTARG};;
-d) ENABLEDISCONNECT=1;;
-g) GENERATEINSTALLCONF=1;;
-h) howto; exit 0;;
-\?) howto; exit 1;;
-esac
-done
-
-if ([ -z "$PROV_CONN" ] || [ -z "$MAIN_CONN" ]) then
- howto
- exit 1
-fi
-
 disable_selinux(){
   echo -n "Disabling selinux..."
   sudo setenforce permissive >/dev/null 2>&1
@@ -98,6 +78,7 @@ setup_env(){
   VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Name:' | awk -F: '{print $2}' | xargs)
   RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Pull From: quay.io' | awk -F ' ' '{print $3}' | xargs)
   PULLSECRET=$HOME/pull-secret.json
+  INSTALLCONFIG=$HOME/install-config.yaml
   OBICMD=openshift-baremetal-install
   EXTRACTDIR=$(pwd)
   curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-client-linux-$VERSION.tar.gz | tar zxvf - oc
@@ -142,6 +123,36 @@ setup_installconfig(){
 }
 
 setup_env
+
+ENABLEDISCONNECT=0
+GENERATEINSTALLCONF=0
+
+while getopts p:b:dgh option
+do
+case "${option}"
+in
+p) PROV_CONN=${OPTARG};;
+b) MAIN_CONN=${OPTARG};;
+d) ENABLEDISCONNECT=1;;
+g) GENERATEINSTALLCONF=1;;
+h) howto; exit 0;;
+\?) howto; exit 1;;
+esac
+done
+
+if ([ -z "$PROV_CONN" ] || [ -z "$MAIN_CONN" ]) then
+ howto
+ exit 1
+fi
+
+if ([ "$GENERATEINSTALLCONF" -eq "0" ]) then
+  if [ ! -f "$INSTALLCONFIG" ]; then
+    echo "$INSTALLCONFIG does not exist and -g was not passed"
+    howto
+    exit 1
+  fi
+fi
+
 install_depends
 disable_selinux
 setup_default_pool
