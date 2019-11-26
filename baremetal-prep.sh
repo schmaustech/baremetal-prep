@@ -70,15 +70,41 @@ mirror_images(){
   /usr/local/bin/oc adm release mirror -a $LOCAL_SECRET_JSON --from=$UPSTREAM_REPO --to-release-image=$LOCAL_REG/$LOCAL_REPO:$OCP_RELEASE --to=$LOCAL_REG/$LOCAL_REPO
 }
 
+find_pullsecret_file() {
+  if [ -f $HOME/pull-secret ] && ( file $HOME/pull-secret|grep ASCII>/dev/null 2>&1 ); then
+     PULLSECRET="$HOME/pull-secret"
+  elif [ -f $HOME/pull-secret.txt ] && ( file $HOME/pull-secret.txt|grep ASCII>/dev/null 2>&1 ); then
+     PULLSECRET="$HOME/pull-secret.txt"
+  elif [ -f $HOME/pull-secret.json ] && ( file $HOME/pull-secret.txt|grep ASCII>/dev/null 2>&1 ); then
+     PULLSECRET="$HOME/pull-secret.json"
+  else
+     echo "Failed - $HOME/pull-secret, $HOME/pull-secret.txt or $HOME/pull-secret.json file not found"; exit 1
+  fi
+}
+
+find_sshkey_file() {
+  if [ -f $HOME/sshkey ] && ( ssh-keygen -l -f $HOME/sshkey >/dev/null 2>&1 ); then
+     SSHKEY="$HOME/sshkey"
+  elif [ -f $HOME/.ssh/id_rsa.pub ] && ( ssh-keygen -l -f $HOME/.ssh/id_rsa.pub >/dev/null 2>&1 ); then
+     PULLSECRET="$HOME/pull-secret.txt"
+  else
+     echo "Failed - $HOME/sshkey or $HOME/.ssh/id_rsa.pub file not found"; exit 1
+  fi
+
+}
+
 setup_env(){
   echo "Setting environment..."
   HOST_URL=`hostname -f`
-  HOME=/home/`whoami`
   USERNAME=`whoami`
+  HOME=/home/$USERNAME
+  INSTALLCONFIG=$HOME/install-config.yaml
+  
+  find_pullsecret_file()
+  find_sshkey_file()
+  
   VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Name:' | awk -F: '{print $2}' | xargs)
   RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Pull From: quay.io' | awk -F ' ' '{print $3}' | xargs)
-  PULLSECRET=$HOME/pull-secret.json
-  INSTALLCONFIG=$HOME/install-config.yaml
   OBICMD=openshift-baremetal-install
   EXTRACTDIR=$(pwd)
   curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-client-linux-$VERSION.tar.gz | tar zxvf - oc
