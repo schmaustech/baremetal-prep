@@ -33,7 +33,7 @@ setup_repository(){
   if `sudo podman ps|grep ocpdiscon-registry|grep Up>/dev/null 2>&1`; then
     sudo podman stop ocpdiscon-registry
     sudo podman rm ocpdiscon-registry
-  }
+  fi
   sudo yum -y install podman httpd httpd-tools
   sudo mkdir -p /opt/registry/{auth,certs,data}
   sudo openssl req -newkey rsa:4096 -nodes -sha256 -keyout /opt/registry/certs/domain.key -x509 -days 365 -out /opt/registry/certs/domain.crt -subj "/C=US/ST=Massachussetts/L=Boston/O=Red Hat/OU=Engineering/CN=$HOST_URL"
