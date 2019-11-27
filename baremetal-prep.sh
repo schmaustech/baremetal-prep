@@ -145,7 +145,7 @@ install_depends(){
 
 setup_installconfig(){
   echo "Creating install-config.yaml..."
-  /usr/bin/ansible-playbook -i hosts make-install-config.yml
+  /usr/bin/ansible-playbook -i hosts make-install-config.yaml
   echo "pullSecret: '`cat $PULLSECRET`'" >> $INSTALLCONFIG
   echo "sshKey: '`cat $SSHKEY`'" >> $INSTALLCONFIG
 }
