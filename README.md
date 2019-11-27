@@ -28,19 +28,22 @@ To use baremetal-prep.sh the system needs the following:
 
 **Usage:**
 
+To use baremetal-prep.sh one simply needs to clone the repo down to the provisioning host.  Then set the execute bit on baremetal-prep.sh.  Then copy the hosts.sample file to hosts and update the information in the file according to the deployment environment.
+
 There are currently 4 switches that can be passed:
 
 - -p (required) physical interface on host that will be used for provisioning bridge
 - -b (required) physical interface on the host that will be used for the baremetal bride
 - -d (optional) will configure for a disconnected install
-- -g (optional) will generate an install-config.yaml
+- -g (optional) will generate a install-config.yaml
+- -m (optional) will generate a metal3-config.yaml
 
 **Example:**
 
 ./baremetal-prep.sh
 
-Usage: ./baremetal-prep.sh -p \&lt;provisioning interface\&gt; -b \&lt;baremetal interface\&gt; -d (configure for disconnected) -g (generate install-config.yaml)
+Usage: ./baremetal-prep.sh -p (provisioning interface) -b (baremetal interface) -d (configure for disconnected) -g (generate install-config.yaml) -m (generate metal3-config.yaml)
 
-Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g
+Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g -m
 
 **To Dos:**
