@@ -114,6 +114,7 @@ setup_env(){
   curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-client-linux-$VERSION.tar.gz | tar zxvf - oc
   sudo cp ./oc /usr/local/bin/oc
   /usr/local/bin/oc adm release extract --registry-config "${PULLSECRET}" --command=$OBICMD --to "${EXTRACTDIR}" ${RELEASE_IMAGE}
+  sudp cp ./openshift-baremetal-install /usr/local/openshift-baremetal-install
   LATEST_CI_IMAGE=$(curl https://openshift-release.svc.ci.openshift.org/api/v1/releasestream/4.3.0-0.ci/latest | grep -o 'registry.svc.ci.openshift.org[^"]\+')
   OPENSHIFT_RELEASE_IMAGE="${OPENSHIFT_RELEASE_IMAGE:-$LATEST_CI_IMAGE}"
   GOPATH=$HOME/go
@@ -167,7 +168,7 @@ existing_install_config(){
 setup_metalconfig(){
   echo "Creating metal3-config.yaml..."
   METALCONFIG=$HOME/metal3-config.yaml
-  OPENSHIFT_INSTALLER=./openshift-baremetal-install
+  OPENSHIFT_INSTALLER=/usr/local/bin/openshift-baremetal-install
   OPENSHIFT_INSTALL_COMMIT=$($OPENSHIFT_INSTALLER version | grep commit | cut -d' ' -f4)
   OPENSHIFT_INSTALLER_RHCOS=${OPENSHIFT_INSTALLER_RHCOS:-https://raw.githubusercontent.com/openshift/installer/$OPENSHIFT_INSTALL_COMMIT/data/data/rhcos.json}
   RHCOS_IMAGE_JSON=$(curl "${OPENSHIFT_INSTALLER_RHCOS}")
