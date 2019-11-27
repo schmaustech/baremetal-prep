@@ -70,7 +70,7 @@ mirror_images(){
   /usr/local/bin/oc adm release mirror -a $LOCAL_SECRET_JSON --from=$UPSTREAM_REPO --to-release-image=$LOCAL_REG/$LOCAL_REPO:$OCP_RELEASE --to=$LOCAL_REG/$LOCAL_REPO
 }
 
-find_pullsecret_file() {
+find_pullsecret_file(){
   if [ -f $HOME/pull-secret ] && ( file $HOME/pull-secret|grep ASCII>/dev/null 2>&1 ); then
      PULLSECRET="$HOME/pull-secret"
   elif [ -f $HOME/pull-secret.txt ] && ( file $HOME/pull-secret.txt|grep ASCII>/dev/null 2>&1 ); then
@@ -82,7 +82,7 @@ find_pullsecret_file() {
   fi
 }
 
-find_sshkey_file() {
+find_sshkey_file(){
   if [ -f $HOME/sshkey ] && ( ssh-keygen -l -f $HOME/sshkey >/dev/null 2>&1 ); then
      SSHKEY="$HOME/sshkey"
   elif [ -f $HOME/.ssh/id_rsa.pub ] && ( ssh-keygen -l -f $HOME/.ssh/id_rsa.pub >/dev/null 2>&1 ); then
