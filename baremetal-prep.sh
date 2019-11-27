@@ -5,7 +5,7 @@
 
 howto(){
   echo "Usage: ./baremetal-prep.sh -p <provisioning interface> -b <baremetal interface> -d (configure for disconnected) -g (generate install-config.yaml) -m (generate metal3-config.yaml)"
-  echo "Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g"
+  echo "Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g -m"
 }
 
 disable_selinux(){
@@ -192,7 +192,7 @@ ENABLEDISCONNECT=0
 GENERATEINSTALLCONF=0
 GENERATEMETALCONF=0
 
-while getopts p:b:dgh option
+while getopts p:b:dgmh option
 do
 case "${option}"
 in
