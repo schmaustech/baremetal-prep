@@ -100,8 +100,8 @@ setup_env(){
   HOME=/home/$USERNAME
   INSTALLCONFIG=$HOME/install-config.yaml
   
-  find_pullsecret_file()
-  find_sshkey_file()
+  find_pullsecret_file
+  find_sshkey_file
   
   VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Name:' | awk -F: '{print $2}' | xargs)
   RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/release.txt | grep 'Pull From: quay.io' | awk -F ' ' '{print $3}' | xargs)
