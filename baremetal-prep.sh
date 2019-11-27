@@ -163,7 +163,7 @@ existing_install_config(){
 setup_metalconfig(){
   echo "Creating metal3-config.yaml..."
   METALCONFIG=$HOME/metal3-config.yaml
-  OPENSHIFT_INSTALLER=/home/bschmaus/go/src/github.com/openshift/installer/bin/openshift-install
+  OPENSHIFT_INSTALLER=./openshift-baremetal-install
   OPENSHIFT_INSTALL_COMMIT=$($OPENSHIFT_INSTALLER version | grep commit | cut -d' ' -f4)
   OPENSHIFT_INSTALLER_RHCOS=${OPENSHIFT_INSTALLER_RHCOS:-https://raw.githubusercontent.com/openshift/installer/$OPENSHIFT_INSTALL_COMMIT/data/data/rhcos.json}
   RHCOS_IMAGE_JSON=$(curl "${OPENSHIFT_INSTALLER_RHCOS}")
