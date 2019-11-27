@@ -4,7 +4,7 @@
 #################################################################
 
 howto(){
-  echo "Usage: ./baremetal-prep.sh -p <provisioning interface> -b <baremetal interface> -d (configure for disconnected) -g (generate install-config.yaml)"
+  echo "Usage: ./baremetal-prep.sh -p <provisioning interface> -b <baremetal interface> -d (configure for disconnected) -g (generate install-config.yaml) -m (generate metal3-config.yaml)"
   echo "Example: ./baremetal-prep.sh -p ens3 -b ens4 -d -g"
 }
 
@@ -160,8 +160,37 @@ existing_install_config(){
   fi
 }
 
+setup_metalconfig(){
+  echo "Creating metal3-config.yaml..."
+  METALCONFIG=$HOME/metal3-config.yaml
+  OPENSHIFT_INSTALLER=/home/bschmaus/go/src/github.com/openshift/installer/bin/openshift-install
+  OPENSHIFT_INSTALL_COMMIT=$($OPENSHIFT_INSTALLER version | grep commit | cut -d' ' -f4)
+  OPENSHIFT_INSTALLER_RHCOS=${OPENSHIFT_INSTALLER_RHCOS:-https://raw.githubusercontent.com/openshift/installer/$OPENSHIFT_INSTALL_COMMIT/data/data/rhcos.json}
+  RHCOS_IMAGE_JSON=$(curl "${OPENSHIFT_INSTALLER_RHCOS}")
+  RHCOS_INSTALLER_IMAGE_URL=$(echo "${RHCOS_IMAGE_JSON}" | jq -r '.baseURI + .images.openstack.path')
+  RHCOS_IMAGE_URL=${RHCOS_IMAGE_URL:-${RHCOS_INSTALLER_IMAGE_URL}}
+  BAREMETALIP=`ip addr show|grep ens4|grep -o "inet [0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*"`
+  echo "kind: ConfigMap" > $METALCONFIG
+  echo "apiVersion: v1" >> $METALCONFIG
+  echo "metadata:" >> $METALCONFIG
+  echo "  name: metal3-config" >> $METALCONFIG
+  echo "  namespace: openshift-machine-api" >> $METALCONFIG
+  echo "data:" >> $METALCONFIG
+  echo "  http_port: \"6180\"" >> $METALCONFIG
+  echo "  provisioning_interface: \"${PROV_CONN}\"" >> $METALCONFIG
+  echo "  provisioning_ip: \"172.22.0.3/24\"" >> $METALCONFIG
+  echo "  dhcp_range: \"172.22.0.10,172.22.0.100\"" >> $METALCONFIG
+  echo "  deploy_kernel_url: \"http://172.22.0.3:6180/images/ironic-python-agent.kernel\"" >> $METALCONFIG
+  echo "  deploy_ramdisk_url: \"http://172.22.0.3:6180/images/ironic-python-agent.initramfs\"" >> $METALCONFIG
+  echo "  ironic_endpoint: \"http://172.22.0.3:6385/v1/\"" >> $METALCONFIG
+  echo "  ironic_inspector_endpoint: \"http://172.22.0.3:5050/v1/\"" >> $METALCONFIG
+  echo "  cache_url: \"http://192.168.0.246/images\"" >> $METALCONFIG
+  echo "  rhcos_image_url: $RHCOS_IMAGE_URL" >> $METALCONFIG
+}
+
 ENABLEDISCONNECT=0
 GENERATEINSTALLCONF=0
+GENERATEMETALCONF=0
 
 while getopts p:b:dgh option
 do
@@ -171,6 +200,7 @@ p) PROV_CONN=${OPTARG};;
 b) MAIN_CONN=${OPTARG};;
 d) ENABLEDISCONNECT=1;;
 g) GENERATEINSTALLCONF=1;;
+m) GENERATEMETALCONF=1;;
 h) howto; exit 0;;
 \?) howto; exit 1;;
 esac
@@ -189,6 +219,9 @@ setup_default_pool
 setup_bridges
 if ([ "$GENERATEINSTALLCONF" -eq "1" ]) then
   setup_installconfig
+fi
+if ([ "$GENERATEMETALCONF" -eq "1" ]) then
+  setup_metalconfig
 fi
 if ([ "$ENABLEDISCONNECT" -eq "1" ]) then
   setup_repository
