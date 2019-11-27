@@ -86,7 +86,7 @@ find_sshkey_file() {
   if [ -f $HOME/sshkey ] && ( ssh-keygen -l -f $HOME/sshkey >/dev/null 2>&1 ); then
      SSHKEY="$HOME/sshkey"
   elif [ -f $HOME/.ssh/id_rsa.pub ] && ( ssh-keygen -l -f $HOME/.ssh/id_rsa.pub >/dev/null 2>&1 ); then
-     PULLSECRET="$HOME/pull-secret.txt"
+     SSHKEY="$HOME/.ssh/id_rsa.pub"
   else
      echo "Failed - $HOME/sshkey or $HOME/.ssh/id_rsa.pub file not found"; exit 1
   fi
@@ -146,6 +146,8 @@ install_depends(){
 setup_installconfig(){
   echo "Creating install-config.yaml..."
   /usr/bin/ansible-playbook -i hosts make-install-config.yml
+  echo "pullSecret: '`cat $PULLSECRET`'" >> $INSTALLCONFIG
+  echo "sshKey: '`cat $SSHKEY`'" >> $INSTALLCONFIG
 }
 
 setup_env
