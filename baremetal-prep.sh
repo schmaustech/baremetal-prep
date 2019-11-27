@@ -108,7 +108,7 @@ setup_env(){
   OBICMD=openshift-baremetal-install
   EXTRACTDIR=$(pwd)
   curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-client-linux-$VERSION.tar.gz | tar zxvf - oc
-  sudo cp /home/bschmaus/oc /usr/local/bin/oc
+  sudo cp ./oc /usr/local/bin/oc
   /usr/local/bin/oc adm release extract --registry-config "${PULLSECRET}" --command=$OBICMD --to "${EXTRACTDIR}" ${RELEASE_IMAGE}
   LATEST_CI_IMAGE=$(curl https://openshift-release.svc.ci.openshift.org/api/v1/releasestream/4.3.0-0.ci/latest | grep -o 'registry.svc.ci.openshift.org[^"]\+')
   OPENSHIFT_RELEASE_IMAGE="${OPENSHIFT_RELEASE_IMAGE:-$LATEST_CI_IMAGE}"
