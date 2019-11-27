@@ -75,7 +75,7 @@ find_pullsecret_file(){
      PULLSECRET="$HOME/pull-secret"
   elif [ -f $HOME/pull-secret.txt ] && ( file $HOME/pull-secret.txt|grep ASCII>/dev/null 2>&1 ); then
      PULLSECRET="$HOME/pull-secret.txt"
-  elif [ -f $HOME/pull-secret.json ] && ( file $HOME/pull-secret.txt|grep ASCII>/dev/null 2>&1 ); then
+  elif [ -f $HOME/pull-secret.json ] && ( file $HOME/pull-secret.json|grep ASCII>/dev/null 2>&1 ); then
      PULLSECRET="$HOME/pull-secret.json"
   else
      echo "Failed - $HOME/pull-secret, $HOME/pull-secret.txt or $HOME/pull-secret.json file not found"; exit 1
@@ -150,7 +150,15 @@ setup_installconfig(){
   echo "sshKey: '`cat $SSHKEY`'" >> $INSTALLCONFIG
 }
 
-setup_env
+existing_install_config(){
+  if ([ "$GENERATEINSTALLCONF" -eq "0" ]) then
+    if [ ! -f "$INSTALLCONFIG" ]; then
+      echo "$INSTALLCONFIG does not exist and -g was not passed"
+      howto
+      exit 1
+    fi
+  fi
+}
 
 ENABLEDISCONNECT=0
 GENERATEINSTALLCONF=0
@@ -173,14 +181,8 @@ if ([ -z "$PROV_CONN" ] || [ -z "$MAIN_CONN" ]) then
  exit 1
 fi
 
-if ([ "$GENERATEINSTALLCONF" -eq "0" ]) then
-  if [ ! -f "$INSTALLCONFIG" ]; then
-    echo "$INSTALLCONFIG does not exist and -g was not passed"
-    howto
-    exit 1
-  fi
-fi
-
+setup_env
+existing_install_config
 install_depends
 disable_selinux
 setup_default_pool
