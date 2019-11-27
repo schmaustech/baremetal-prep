@@ -30,6 +30,10 @@ setup_default_pool(){
 }
 
 setup_repository(){
+  if `sudo podman ps|grep ocpdiscon-registry|grep Up>/dev/null 2>&1`; then
+    sudo podman stop ocpdiscon-registry
+    sudo podman rm ocpdiscon-registry
+  }
   sudo yum -y install podman httpd httpd-tools
   sudo mkdir -p /opt/registry/{auth,certs,data}
   sudo openssl req -newkey rsa:4096 -nodes -sha256 -keyout /opt/registry/certs/domain.key -x509 -days 365 -out /opt/registry/certs/domain.crt -subj "/C=US/ST=Massachussetts/L=Boston/O=Red Hat/OU=Engineering/CN=$HOST_URL"
@@ -42,8 +46,8 @@ setup_repository(){
   sudo firewall-cmd --add-port=5000/tcp --zone=public   --permanent
   sudo firewall-cmd --add-service=http  --permanent
   sudo firewall-cmd --reload
-  sudo podman create --name poc-registry -p 5000:5000 -v /opt/registry/data:/var/lib/registry:z -v /opt/registry/auth:/auth:z -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry" -e "REGISTRY_HTTP_SECRET=ALongRandomSecretForRegistry" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v /opt/registry/certs:/certs:z -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key docker.io/library/registry:2
-  sudo podman start poc-registry
+  sudo podman create --name ocpdiscon-registry -p 5000:5000 -v /opt/registry/data:/var/lib/registry:z -v /opt/registry/auth:/auth:z -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry" -e "REGISTRY_HTTP_SECRET=ALongRandomSecretForRegistry" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v /opt/registry/certs:/certs:z -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key docker.io/library/registry:2
+  sudo podman start ocpdiscon-registry
   mirror_images
   update_installconfig
 }
